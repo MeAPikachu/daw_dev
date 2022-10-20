@@ -1,3 +1,21 @@
+This is a software based on the DAW_Demo
+
+Version 1.1 :  Allow it to take data for a fixed time 
+
+```
+DAW_Demo /etc/DAW_Demo/DAW_Config.txt 23
+```
+
+Version 1.2 : Allow it to delete the first useless samples 
+```
+DAW_Demo /etc/DAW_Demo/DAW_Config.txt 23 200
+```
+
+
+Version 1.3 : Add support to the A4818 Adapter
+
+DAW_Config.txt : OPEN A4818 0 0 
+
 -----------------------------------------------------------------------------
 
                    --- CAEN SpA - Computing Division ---
@@ -28,6 +46,9 @@
   -----------------------------------------------------------------------------
   - Linux 32/64Bit
   - Digitizer X730/ x725 family with DAW firmware
+  - CAENDigitizer Lib
+  - CAENVME Lib 
+  - g++ 
 
 
   How to get support
@@ -36,6 +57,10 @@
   CAEN makes available the technical support of its specialists for requests
   concerning CAEN products. Use the support form available at the following link:
   https://www.caen.it/support-services/support-form
+  
+  Tsinghua Relics Collaboration : Chengjie Jia
+  Wechat : MeAPikachu 
+  Gmail: meapikachu@gmail.com
 
 
   Description:
