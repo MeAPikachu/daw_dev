@@ -27,10 +27,11 @@
 # PCI [LINKNUM] [CONET NODE] 0     Desktop/NIM/VME through CONET (optical link) 
 # PCI [LINKNUM] [CONET NODE] [BA]  VME digitizer through V2718 (BA = BaseAddress of the VME board, 32 bit hex)
 
-OPEN USB 0 0x32100000
+#OPEN USB 0 0x32100000
 #OPEN USB 0 0
 #OPEN PCI 0 0 0x32110000
 #OPEN PCI 0 0 0
+OPEN A4818 0 0 
 
 # START ACQUISITION(SW,S_IN,FIRST_TRG,LVDS): board start acquisition signal source
 #start acquisition settings only apply when not in synchronization mode (see below) 
