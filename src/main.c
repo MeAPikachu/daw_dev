@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 	// Open the digitizer and read the board information
 	if (ErrCode == ERR_NONE) {
 		printf("Open digitizers\n");
-		if (OpenDigitizer(handle, &ConfigVar)) ErrCode = ERR_DGZ_OPEN;
+		if (CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB_A4818,21148,0,0,handle)) ErrCode = ERR_DGZ_OPEN;
 	}
 	
 	// Print board info and set board-specific parameters
