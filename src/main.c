@@ -14,8 +14,8 @@
 * software, documentation and results solely at his own risk.
 ******************************************************************************/
 
-#define DAWrunner_Release        "1.0"
-#define DAWrunner_Release_Date   "May 2017"
+#define DAWrunner_Release        "1.3.1"
+#define DAWrunner_Release_Date   "Oct 2022"
 
 #include "CAENDigitizer.h"
 #include "CAENDigitizerType.h"
@@ -76,9 +76,9 @@ int main(int argc, char *argv[])
 	struct stat info;
 	uint32_t BoardInfo;
 	// code added by chengjie 
-	printf("argc number : %d\n",argc);
+	// printf("argc number : %d\n",argc);
 	printf("**************************************************************\n");
-	printf("                      X725/X730 DAW Demo %s\n", DAWrunner_Release);
+	printf("                      X725/X730 DAW Dev  %s\n", DAWrunner_Release);
 	printf("**************************************************************\n");
 	
 #ifdef  WIN32
@@ -240,8 +240,11 @@ int main(int argc, char *argv[])
 			useless_set=atoi(argv[3]);
 			printf("useless_data delete %d\n",useless_set); 
 		}
-
+		
+		if (argc>2)
+		{
 		printf("start acquisition time : %d\n",start_time);
+		}
 
 
 		PrevCheckTime = get_time();
