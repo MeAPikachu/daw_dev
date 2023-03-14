@@ -5,6 +5,7 @@
 
 extern char path[128];
 
+// The get time function will return the ms. 
 static long get_time()
 {
 	long time_ms;
@@ -22,38 +23,58 @@ static long get_time()
 }
 
 ERROR_CODES OpenConfigFile(FILE **f_ini, char *ConfigFileName) {
+	// FILE ** is the pointer of the pointer(file)
 	ERROR_CODES return_code = ERR_NONE;
 	printf("Opening Configuration File %s\n", ConfigFileName);
 	if ((*f_ini = fopen(ConfigFileName, "r")) == NULL) return_code = ERR_CONF_FILE_NOT_FOUND;
+	// *f_ini is the pointer(file)
 	return return_code;
 }
 
+// ConfigVar includes the general file parameter and the board variables.
 ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
+	// ParseConfigFile will get the config variable from the config file
 	ERROR_CODES return_code = ERR_NONE;
-	char *str, str1[1000];
+	char *str, str1[1000]; // str is what we get. 
 	char strline[1000];
-	uint32_t addr, data;
-	int line = 0;
-	int i, j, ch = -1, board = -1, val, Off = 0;
+	uint32_t addr, data; // address and the data itself.
+	int line = 0; // count the lines .. 
+	int i, j, ch = -1, board = -1, val, Off = 0; // by default, we will set all the channels and boards
 	int DefConfig = 0;
 	/* Default settings */
 	memset(ConfigVar, 0, sizeof(*ConfigVar));
+	
 	ConfigVar->Nhandle = 0;
 	#ifdef WIN32
 		sprintf(ConfigVar->OutFilePath, "%s%s", path, OUTFILE_PATH);
 	#else
 		sprintf(ConfigVar->OutFilePath, "%s%s", getenv("HOME"), OUTFILE_PATH);
 	#endif
+	// Default OutFilePath is ~/DAW_data (OUTFILE_PATH)
 	sprintf(ConfigVar->OutFileName, "%s", OUTFILE_NAME);
+	// Default Outfile name is 'run0'
 	sprintf(ConfigVar->GnuPlotPath, "%s%s", path, PLOTTER_PATH);
 	/* read config file and assign parameters */
-	while (fgets(strline, 1000, f_ini) != NULL) { // get a line
+	
+	while (fgets(strline, 1000, f_ini) != NULL) { // get a line and call it strline
 		line++;
-		if (!strline || strline[0] == '#' || strline[0] == ' ' || strline[0] == '\t' || strline[0] == '\n' || strline[0] == '\r') continue;
+		// line counts the total number of string lines
+
+		// if the line is started with # or a blankspace;
+		if (!strline || strline[0] == '#' || strline[0] == ' ' || strline[0] == '\t' || strline[0] == '\n' || strline[0] == '\r') 
+		{
+			continue;
+		}
+
+		// Get the first parameter from the strline and call it str. 
 		str = strtok(strline, " \r\t\n");
+
+		// if it is started with '[', it confines the effect range.
+		// Board 0 , 1 ,2 ,3 and so on..
 		if (str[0] == '[') {
 			fscanf(f_ini, "%d", &val);
 			if (strstr(str, "COMMON")) { ch = -1; board = -1; }
+			// strstr is sub-str judge
 			else if (strstr(str, "BOARD")) { ch = -1; board = (int)strtol(strtok(NULL, " \r\t\n"), NULL, 10); }
 			else if (strstr(str, "CHANNEL")) {
 				ch = (int)strtol(strtok(NULL, " \r\t\n"), NULL, 10);
@@ -63,59 +84,87 @@ ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
 		}
 
 		// OPEN: malloc memory for the board config variable, init it to default and read the details of physical path to the digitizer
+		// Nhandle will start from 0;
 		if (!strcmp(strcpy(str1, str), "OPEN")) {
-			// malloc board config variable
+			// malloc board config variable, malloc : memory allocates. 
 			ConfigVar->BoardConfigVar[ConfigVar->Nhandle] = (DAWBoardConfig_t*)malloc(sizeof(DAWBoardConfig_t));
 			// initialize parameters
-			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->ExtTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
-			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->StartMode = CAEN_DGTZ_SW_CONTROLLED;
-			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->FPIOtype = CAEN_DGTZ_IOLevel_TTL;
-			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->EnableMask = 0x0;
-			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->GainFactor = 0;
-			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->GWn = 0;
+			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->ExtTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY; // Trigger is the acquisition mode;
+			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->StartMode = CAEN_DGTZ_SW_CONTROLLED; // Software Controlled Start
+			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->FPIOtype = CAEN_DGTZ_IOLevel_TTL; // TTL Type
+			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->EnableMask = 0x0; // By default, all channels are not enabled
+			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->GainFactor = 0; // No gain factor
+			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->GWn = 0; // GW: General Write Number;
 			for (j = 0; j < MAX_CH; j++) {
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->RecordLength[j] = 256;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->PulsePolarity[j] = 1;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->preTrgg[j] = 12;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->NSampAhe[j] = 4;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->DAWTrigThr[j] = 1000;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BLineMode[j] = 0;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BLineDefValue[j] = 0x2000;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->DCoffset[j] = 0;
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->TP_Enable[j] = 0;
-
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->RecordLength[j] = 256; // Default Record Length for each channel;
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->PulsePolarity[j] = 1; // Polarity
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->preTrgg[j] = 12; // Pre-Trigger 
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->NSampAhe[j] = 4; // NSample ? 
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->DAWTrigThr[j] = 10; // Trigger Threshold 
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BLineMode[j] = 0; // Baseline Mode 
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BLineDefValue[j] = 0x2000; // Baseline Value
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->DCoffset[j] = 0; // DC Offset 
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->TP_Enable[j] = 0; // What is TP ??
 			}
 			// end of initalization
-			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No 1st argument for %s. The command will be ignored\n", str1); continue; }
-			if (strcmp(str, "USB") == 0) ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType = CAEN_DGTZ_USB;
-			else if (strcmp(str, "PCI") == 0) ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType = CAEN_DGTZ_OpticalLink;
-			else if (strcmp(str, "A4818")==0) ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType = CAEN_DGTZ_USB_A4818 ; 
-			else { printf("%s %s: Invalid connection type\n", str, str1); return ERR_CONF_FILE_NOT_FOUND; }
 
-			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No 1st argument for %s. The command will be ignored\n", str1); continue; }
+
+			// Strtok is to divide the string into several parts, NULL is the same as before, so we now get the second parameter.
+			// Also the first parameter will be called str1 
+			if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+			{ printf("No 1st argument for %s. The command will be ignored\n", str1); continue; }
+
+			// Get the linktype and log it.
+			if (strcmp(str, "USB") == 0) 
+			{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType = CAEN_DGTZ_USB;}
+			else if (strcmp(str, "PCI") == 0) 
+			{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType = CAEN_DGTZ_OpticalLink; }
+			else if (strcmp(str, "A4818")==0) 
+			{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType = CAEN_DGTZ_USB_A4818 ; }
+			else 
+			{printf("%s %s: Invalid connection type\n", str, str1); return ERR_CONF_FILE_NOT_FOUND; }
+			
+			// get the [2]/3 string segment
+			if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+			{ 
+			  printf("No 2nd argument for %s. The command will be ignored\n", str1); 
+			  continue; 
+			}
 			ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkNum = (int)strtol(str, NULL, 10);
-			if (ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType == CAEN_DGTZ_USB) { // Only the USB needs four parameters
-				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->ConetNode = 0;
-				if ((str = strtok(NULL, " \r\t\n")) == NULL) ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = 0;
-				else ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = (int)strtol(str, NULL, 0);
+
+			// The USB Connection does not need the Conet Number, it is always 0;
+			if (ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->LinkType == CAEN_DGTZ_USB) { 
+				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->ConetNode = 0; // The Conet Node of the USB is always 0;
+				if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+				{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = 0;}
+				else 
+				{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = (int)strtol(str, NULL, 0);}
 			}
 			else {
-				if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No 3rd argument for %s. The command will be ignored\n", str1); continue; }
+				if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+				{ printf("No 3rd argument for %s. The command will be ignored\n", str1); continue; }
 				ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->ConetNode = (int)strtol(str, NULL, 10);
-				if ((str = strtok(NULL, " \r\t\n")) == NULL) ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = 0;
-				else ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = (int)strtol(str, NULL, 0);
+				
+				// Other Connection Type needs the Conet Number and the Base Address
+				if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+				{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = 0;}
+				else 
+				{ConfigVar->BoardConfigVar[ConfigVar->Nhandle]->BaseAddress = (int)strtol(str, NULL, 0);}
 			}
-			ConfigVar->Nhandle++;
+			ConfigVar->Nhandle++; // Nhandle is important that logs the total number of boards.
 			if ((str = strtok(NULL, " \r\t\n")) != NULL) printf("WARNING: too many arguments in %s. the first exceeding argument is %s\n", str1, str);
+			// We have at most 4 parameters : OPEN, LinkType, LinkNum , ConetNumber, BaseAddress;
 			continue;
 		}
 
 		// Generic VME Write (address offset + data, both exadecimal)
+		// We now simply log the tasks. 
 		if (!strcmp(strcpy(str1, str), "WRITE_REGISTER")) {
 			addr = (int)strtol(strtok(NULL, " \r\t\n"), NULL, 0);
 			data = (int)strtol(strtok(NULL, " \r\t\n"), NULL, 0);
 			for (i = 0; i < ConfigVar->Nhandle; i++) {
 				if (ConfigVar->BoardConfigVar[i]->GWn < MAX_GW) {
+					// The maximum GW is set by ourselves.
 					if (i == board || board == -1) {
 						ConfigVar->BoardConfigVar[i]->GWaddr[ConfigVar->BoardConfigVar[i]->GWn] = addr;
 						ConfigVar->BoardConfigVar[i]->GWdata[ConfigVar->BoardConfigVar[i]->GWn] = data;

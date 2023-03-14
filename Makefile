@@ -39,7 +39,7 @@ install:
 	sudo ln -sf ./DAW_Demo /usr/bin/DAW_Demo
 	$(shell if [ ! -e /etc/DAW_Demo ];then sudo  mkdir -p /etc/DAW_Demo; fi)
 	sudo rm -rf /etc/DAW_Demo/DAW_Config.txt
-	sudo mv ./DAW_Config.txt /etc/DAW_Demo/DAW_Config.txt
+	sudo cp ./DAW_Config.txt /etc/DAW_Demo/DAW_Config.txt
 
 
 clean:
