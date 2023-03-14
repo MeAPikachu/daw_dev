@@ -73,7 +73,8 @@ OUTFILE_WAVE NO
 # if they are commented, "DAW_output" and "run0" will be the default output directory and name
 # OUTFILE_PATH DAW_output\
 # OUTFILE_NAME run0
-OUTFILE_PATH /home/share/daw_data
+OUTFILE_PATH /home/share/daw_data/
+OUTFILE_NAME run1
 
 # SIZE OF A SINGLE OUTPUT BINARY FILE(in MBytes). After this size has been reached a new file will be open with a _(#+1) suffix. 
 OUTFILE_MAXSIZE 100

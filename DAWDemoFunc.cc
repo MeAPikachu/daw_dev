@@ -164,7 +164,7 @@ ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
 			data = (int)strtol(strtok(NULL, " \r\t\n"), NULL, 0);
 			for (i = 0; i < ConfigVar->Nhandle; i++) {
 				if (ConfigVar->BoardConfigVar[i]->GWn < MAX_GW) {
-					// The maximum GW is set by ourselves.
+					// The maximum GW is set by ourselves.(2000 by now )
 					if (i == board || board == -1) {
 						ConfigVar->BoardConfigVar[i]->GWaddr[ConfigVar->BoardConfigVar[i]->GWn] = addr;
 						ConfigVar->BoardConfigVar[i]->GWdata[ConfigVar->BoardConfigVar[i]->GWn] = data;
@@ -180,16 +180,26 @@ ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
 		}
 
 		// Enable gnuplot (YES/NO)
+		// We have already got the first parameter and saved it into str, and now we cp it to the str1
 		if (!strcmp(strcpy(str1, str), "PERIODIC_PLOT")) {
-			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No argument for %s. The command will be ignored\n", str1); continue; }
-			if (strcmp(str, "YES") == 0) ConfigVar->PlotEnable = 1;
-			else if (strcmp(str, "NO") == 0) ConfigVar->PlotEnable = 0;
-			else printf("%s: invalid option\n", str);
+			if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+			{   
+				printf("No argument for %s. The command will be ignored\n", str1); 
+				continue; 
+			}
+			if (strcmp(str, "YES") == 0) 
+			{ConfigVar->PlotEnable = 1;}
+			else if (strcmp(str, "NO") == 0) 
+			{ConfigVar->PlotEnable = 0;}
+			else 
+			{printf("%s: invalid option\n", str);}
+			
 			if ((str = strtok(NULL, " \r\t\n")) != NULL) printf("WARNING: too many arguments in %s. the first exceeding argument is %s\n", str1, str);
 			continue;
 		}
 
 		// Enable sync procedure (YES/NO)
+		// What does the sync mean ? 
 		if (!strcmp(strcpy(str1, str), "SYNC_ENABLE")) {
 			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No argument for %s. The command will be ignored\n", str1); continue; }
 			if (strcmp(str, "YES") == 0) ConfigVar->SyncEnable = 1;
@@ -200,6 +210,7 @@ ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
 		}
 
 		// Enable raw output (YES/NO)
+		// Whether We will output the raw file(.bin)
 		if (!strcmp(strcpy(str1, str), "OUTFILE_RAW")) {
 			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No argument for %s. The command will be ignored\n", str1); continue; }
 			if (strcmp(str, "YES") == 0) ConfigVar->OFRawEnable = 1;
@@ -209,7 +220,8 @@ ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
 			continue;
 		}
 
-		// Enable raw output (YES/NO)
+		// Enable wavefile output (YES/NO)
+		// Whether we will output the processed wave file. 
 		if (!strcmp(strcpy(str1, str), "OUTFILE_WAVE")) {
 			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No argument for %s. The command will be ignored\n", str1); continue; }
 			if (strcmp(str, "YES") == 0) ConfigVar->OFWaveEnable = 1;
@@ -219,20 +231,29 @@ ERROR_CODES ParseConfigFile(FILE *f_ini, DAWConfig_t *ConfigVar) {
 			continue;
 		}
 
-		// Output file path
+		// Output file path is where we will store the data..
+		// This function is wrong. 
 		if (!strcmp(strcpy(str1, str), "OUTFILE_PATH")) {
-			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No argument for %s. The command will be ignored\n", str1); continue; }
+			if ((str = strtok(NULL, " \r\t\n")) == NULL) 
+			{ printf("No argument for %s. The command will be ignored\n", str1); continue; }
+			
+			/*
 			#ifdef WIN32
 			sprintf(ConfigVar->OutFilePath, "%s%s", path, str);
 			#else
 			sprintf(ConfigVar->OutFilePath, "%s%s", getenv("HOME"), str);
 			#endif
+			*/
+			
 			strcpy(ConfigVar->OutFilePath, str);
+			printf("Outfile Path: %s",ConfigVar->OutFilePath);
+			// If we still have the spare parameters. 
 			if ((str = strtok(NULL, " \r\t\n")) != NULL) printf("WARNING: too many arguments in %s. the first exceeding argument is %s\n", str1, str);
 			continue;
 		}
 
 		// Output file name
+		// The default output file name is run0 
 		if (!strcmp(strcpy(str1, str), "OUTFILE_NAME")) {
 			if ((str = strtok(NULL, " \r\t\n")) == NULL) { printf("No argument for %s. The command will be ignored\n", str1); continue; }
 			strcpy(ConfigVar->OutFileName, str);

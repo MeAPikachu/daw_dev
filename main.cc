@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
 
 
 	if (ErrCode == ERR_NONE) ErrCode = ParseConfigFile(f_ini, &ConfigVar);
+	// Parse Config File will calculate the Configvar.Nhandle
 	if (f_ini!=NULL) fclose(f_ini);
 	
 	// Allocate space for handles and counters according to the number of boards in the acquisition chain

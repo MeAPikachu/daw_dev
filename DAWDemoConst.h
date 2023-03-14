@@ -2,7 +2,7 @@
 #define _DAWDEMOCONST
 
 #define MAX_CH                  16   /* max. number of channels */
-#define MAX_GW                1000   /* max. number of generic write commads */
+#define MAX_GW                2000   /* max. number of generic write commads */
 #define GNUPLOT_DEFAULT_PATH    ""
 #define MAX_NUM_TRACES          16   /* Maximum number of traces in a plot */
 #define BASE_HEADER_SIZE         4   /* Base header size in 32-bit words*/
