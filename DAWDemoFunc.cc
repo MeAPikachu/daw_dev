@@ -571,11 +571,20 @@ ERROR_CODES OpenRawFile(FILE **outfile, int BoardIndex, int FileIndex, char *pat
 	ERROR_CODES return_code = ERR_NONE;
 	char filename[400];
 	struct stat info;
+	
+	time_t now;
+	struct tm* timeinfo;
+	char timestamp[20];
+	time(&now);
+    timeinfo = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%Y%m%d%H%M%S", timeinfo);
+
+	
 	if (stat(path, &info) != 0) {
 		printf("path %s cannot be accessed. Please verify that the selected directory exists and is writable\n", path); return ERR_OUTFILE_OPEN;
 	}
 	if (*outfile != NULL) fclose(*outfile);
-	sprintf(filename, "%s%s_raw_b%d_seg%d.bin", path, fname, BoardIndex, FileIndex);
+	sprintf(filename, "%s%s_raw_b%d_seg%d_%s.bin", path, fname, BoardIndex, FileIndex,timestamp);
 	if ((*outfile = fopen(filename, "w")) == NULL) {
 		printf("output file %s could not be created.\n", filename);
 		return_code = ERR_OUTFILE_OPEN;

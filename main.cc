@@ -367,6 +367,7 @@ int main(int argc, char *argv[])
 				int i ; 
 				ConfigVar.Quit=0;
 				ConfigVar.AcqRun=1;
+				sleep(5); 
 				for (i = 0; i < ConfigVar.Nhandle; i++) 
 				{ 
 					if(ConfigVar.BoardConfigVar[i]->StartMode == CAEN_DGTZ_SW_CONTROLLED)
